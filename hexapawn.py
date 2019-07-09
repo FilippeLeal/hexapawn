@@ -1,6 +1,6 @@
 # import the pygame module, so you can use it
 import pygame
-direc = r"C:\Users\filip\Documents\python codes\hexapawn" 
+direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn" 
 
 ### Implementar métodos gerais usando métodos de cada classe separadamente para as ações
 
@@ -65,8 +65,16 @@ def place(piece,zoneList,screen):
     zoneList[piece.sqr].addPiece(piece)
     piece.draw(screen)    
 
-#def movePiece(Piece,zoneList,screen):
-    #piece.
+
+
+def movePiece(Piece,zoneList,screen):
+    if pygame.mouse.get_pressed()[0]==1:
+        click=pygame.mouse.get_pos()
+        zone=getZone(sqSize,click,listloc,z)
+        if zone.pos==Piece.zone.pos+(1,-1) or zone.pos==Piece.zone.pos+(-1,-1):
+            write("deu bom",screen,2)
+        else:
+            write('quase bom',screen,2)
     
 
 
@@ -104,8 +112,7 @@ def main():
 
     # Text at the bottom
     pygame.font.init()
-    #myfont = pygame.font.SysFont('Arial', 35)
-    #write("choose the piece you want to move",screen)
+    
 
     pc0=Piece(z,0,black)
     pc1=Piece(z,1,black)
@@ -135,10 +142,12 @@ def main():
                     zone=getZone(sqSize,click,listloc,z)
                     if zone.getPiece()[0].isPlayer():
                         selectPiece(zone,zone.getPiece()[0],screen)
+                        write("choose where you want to move the selected piece",screen,0)
+                        click=pygame.mouse.get_pos()
                     else:
                         write("That's not your piece! Your's are BLUE!",screen,1500) 
                         write("choose the piece you want to move",screen,0) 
-                    #movePiece()
+                        #movePiece()
                 else:
                     write("There's no piece at this location!!!",screen,1500) 
                     write("choose the piece you want to move",screen,0)    
