@@ -2,6 +2,7 @@
 import pygame
 
 #Change game directory and size accordingly
+
 direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn" 
 #size=(720,770,120,360,600,120,725,720,100,60,35) #default size
 size=[360,385,60,180,300,60,365,360,50,30,17]
@@ -34,6 +35,12 @@ class Zone:
         self.piece.remove(piece)
         self.occupied=False
 
+    def zoneColor(self):
+        if (self.loc[0]+self.loc[1])%2 == 1:
+            return (185,122,87)
+        else:
+            return (250,250,250)
+
 
 class Piece:
     def __init__(self,zone,sqr,color):
@@ -54,8 +61,10 @@ class Piece:
         else:
             return True
     
-    def changePlace(self,newZone):
+    def changePlace(self,zone,newZone):
         self.zone=newZone
+        zone.removePiece(self)
+        newZone.addPiece(self)
 
         
 
@@ -86,23 +95,27 @@ def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
     validMove0=(Piece.zone.loc[0],Piece.zone.loc[1]-1)
     validMove1=(Piece.zone.loc[0]+1,Piece.zone.loc[1]-1)
     validMove2=(Piece.zone.loc[0]-1,Piece.zone.loc[1]-1)
-    
+    print(validMove0)
+    print(validMove1)
+    print(validMove2)
     if (zone.loc==validMove1 or zone.loc==validMove2) and zone.hasPiece():
-        write("deu bom",1000)
+        write("Moved!",1000)
     if (zone.loc==validMove0) and zone.hasPiece()==False:
-        Piece.zone.removePiece(Piece)
-        Piece.changePlace(zone)
+        #Piece.zone.removePiece(Piece)
+        Piece.changeColor(zone.zoneColor())
         Piece.draw()
+        Piece.changePlace(Piece.zone,zone)
         if Piece.isPlayer():
             Piece.changeColor((0,0,250))
         else:
             Piece.changeColor((0,0,0))
         Piece.draw()
-        selectedPiece=[]
-        write("deu bom 2",1000)
+        moved=True
+        write("Moved!",1000)
     else:
-        write("quase bom",1000)
-    return selectedPiece
+        moved=False
+        write("Invalid Move!",2000)
+    return moved
 
 
 
@@ -181,8 +194,12 @@ def main():
                         write("There's no piece at this location!!!",1500) 
                         write("choose the piece you want to move",0)    
                 else:
-                    selectedPiece=movePiece(selectedPiece,listloc,click,z,sqSize)
-                    write("wait for your turn",0)
+                    moved=movePiece(selectedPiece,listloc,click,z,sqSize)
+                    if moved==True:
+                        write("wait for your turn",0)
+                        selectedPiece=[]
+                    else:
+                        write("choose where you want to move the selected piece",0)
 
                     
             # only do something if the event is of type QUIT
