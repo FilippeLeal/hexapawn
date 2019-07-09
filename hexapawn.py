@@ -1,7 +1,14 @@
 # import the pygame module, so you can use it
 import pygame
-direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn" 
 
+#Change game directory and size accordingly
+direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn" 
+#size=(720,770,120,360,600,120,725,720,100,60,35) #default size
+size=[360,385,60,180,300,60,365,360,50,30,17]
+
+#Using "screen" here take some boot time for the game, but makes the code shorter
+
+screen = pygame.display.set_mode((size[0],size[1]))
 ### Implementar métodos gerais usando métodos de cada classe separadamente para as ações
 
 class Zone:
@@ -21,7 +28,11 @@ class Zone:
     def addPiece(self,piece):
         self.piece.append(piece)
         self.occupied=True
-        return self.piece
+
+    
+    def removePiece(self,piece):
+        self.piece.remove(piece)
+        self.occupied=False
 
 
 class Piece:
@@ -31,8 +42,8 @@ class Piece:
         self.color=color
         self.selected=False
 
-    def draw(self,screen):
-        pygame.draw.circle(screen, self.color, self.zone.center, 60)
+    def draw(self,screen=screen,size=size):
+        pygame.draw.circle(screen, self.color, self.zone.center, size[9])
     
     def changeColor(self,color):
         self.color=color
@@ -42,12 +53,15 @@ class Piece:
             return False
         else:
             return True
+    
+    def changePlace(self,newZone):
+        self.zone=newZone
 
         
 
-def write(text,screen,wait):
-    screen.fill((255,255,255),(0,725,720,100))
-    screen.blit(pygame.font.SysFont('Arial', 35).render(text, False, (0, 0, 255)),(0,725))
+def write(text,wait,size=size,screen=screen):
+    screen.fill((255,255,255),(0,size[6],size[7],size[8]))
+    screen.blit(pygame.font.SysFont('Arial', size[10]).render(text, False, (0, 0, 255)),(0,size[6]))
     pygame.display.update()
     pygame.time.wait(wait)
     
@@ -56,26 +70,39 @@ def getZone(sqSize, where,listloc,z):
     yZone=int(where[1]/sqSize/2)
     return z[listloc.index((xZone,yZone))]
 
-def selectPiece(z,piece,screen):
+def selectPiece(z,piece,screen=screen):
     piece.changeColor((255,255,0))
     piece.draw(screen)
     return 0
     
-def place(piece,zoneList,screen):
+def place(piece,zoneList,screen=screen):
     zoneList[piece.sqr].addPiece(piece)
     piece.draw(screen)    
 
 
 
-def movePiece(Piece,zoneList,screen):
-    if pygame.mouse.get_pressed()[0]==1:
-        click=pygame.mouse.get_pos()
-        zone=getZone(sqSize,click,listloc,z)
-        if zone.pos==Piece.zone.pos+(1,-1) or zone.pos==Piece.zone.pos+(-1,-1):
-            write("deu bom",screen,2)
-        else:
-            write('quase bom',screen,2)
+def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
+    zone=getZone(sqSize,click,listloc,z)
+    validMove0=(Piece.zone.loc[0],Piece.zone.loc[1]-1)
+    validMove1=(Piece.zone.loc[0]+1,Piece.zone.loc[1]-1)
+    validMove2=(Piece.zone.loc[0]-1,Piece.zone.loc[1]-1)
     
+    if (zone.loc==validMove1 or zone.loc==validMove2) and zone.hasPiece():
+        write("deu bom",1000)
+    if (zone.loc==validMove0) and zone.hasPiece()==False:
+        Piece.zone.removePiece(Piece)
+        Piece.changePlace(zone)
+        Piece.draw()
+        if Piece.isPlayer():
+            Piece.changeColor((0,0,250))
+        else:
+            Piece.changeColor((0,0,0))
+        Piece.draw()
+        selectedPiece=[]
+        write("deu bom 2",1000)
+    else:
+        write("quase bom",1000)
+    return selectedPiece
 
 
 
@@ -90,18 +117,20 @@ def main():
     pygame.display.set_caption("HexaPawn")
      
     # create a surface on screen that has the size of board
-    screen = pygame.display.set_mode((720,770))
+    
+    
     screen.fill((255,255,255))
     image = pygame.image.load(direc+"\\tiles.png")
-    image.convert()
-    pos=[(120),(360),(600)]
-    sqSize=120
+    image=pygame.transform.scale(image,(size[0],size[1]))
+    #image.convert()
+    pos=[size[2],size[3],size[4]]
+    sqSize=size[5]
     black=(0,0,0)
     blue=(0,0,250)
     yellow=(250,250,0)
     screen.blit(image,(0,0))
     listloc=[(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
-    write("Choose the piece you want to move",screen,0)
+    write("Choose the piece you want to move",0)
     
     
     #create tiles objects
@@ -121,37 +150,40 @@ def main():
     pl1=Piece(z,7,blue)
     pl2=Piece(z,8,blue)
     
-    place(pc0,z,screen)
-    place(pc1,z,screen)
-    place(pc2,z,screen)
-    place(pl0,z,screen)
-    place(pl1,z,screen)
-    place(pl2,z,screen)
+    place(pc0,z)
+    place(pc1,z)
+    place(pc2,z)
+    place(pl0,z)
+    place(pl1,z)
+    place(pl2,z)
     
      
     # define a variable to control the main loop
     running = True
-     
+    selectedPiece=[] 
     # main loop
     while running:
         # event handling, gets all event from the event queue
         for event in pygame.event.get():
             if pygame.mouse.get_pressed()[0]==1:
                 click=pygame.mouse.get_pos()
-                if getZone(sqSize,click,listloc,z).hasPiece():
-                    zone=getZone(sqSize,click,listloc,z)
-                    if zone.getPiece()[0].isPlayer():
-                        selectPiece(zone,zone.getPiece()[0],screen)
-                        write("choose where you want to move the selected piece",screen,0)
-                        click=pygame.mouse.get_pos()
+                if selectedPiece==[]:
+                    if getZone(sqSize,click,listloc,z).hasPiece():
+                        zone=getZone(sqSize,click,listloc,z)
+                        if zone.getPiece()[0].isPlayer():
+                            selectPiece(zone,zone.getPiece()[0])
+                            selectedPiece=zone.getPiece()[0]
+                            write("choose where you want to move the selected piece",0)
+                        else:
+                            write("That's not your piece! Your's are BLUE!",1500) 
+                            write("choose the piece you want to move",0) 
                     else:
-                        write("That's not your piece! Your's are BLUE!",screen,1500) 
-                        write("choose the piece you want to move",screen,0) 
-                        #movePiece()
+                        write("There's no piece at this location!!!",1500) 
+                        write("choose the piece you want to move",0)    
                 else:
-                    write("There's no piece at this location!!!",screen,1500) 
-                    write("choose the piece you want to move",screen,0)    
-                    
+                    selectedPiece=movePiece(selectedPiece,listloc,click,z,sqSize)
+                    write("wait for your turn",0)
+
                     
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
