@@ -2,10 +2,10 @@
 import pygame
 
 #Change game directory and size accordingly
-
-direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn" 
-#size=(720,770,120,360,600,120,725,720,100,60,35) #default size
-size=[360,385,60,180,300,60,365,360,50,30,17]
+direc = r"C:\Users\filip\Documents\python codes\hexapawn\local"     #desktop location
+#direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
+size=(720,770,120,360,600,120,725,720,100,60,35)                   #default size
+#size=[360,385,60,180,300,60,365,360,50,30,17]                       #mini size
 
 #Using "screen" here take some boot time for the game, but makes the code shorter
 
@@ -24,7 +24,7 @@ class Zone:
         return self.occupied
     
     def getPiece(self):
-        return self.piece
+        return self.piece[0]
     
     def addPiece(self,piece):
         self.piece.append(piece)
@@ -36,7 +36,7 @@ class Zone:
         self.occupied=False
 
     def zoneColor(self):
-        if (self.loc[0]+self.loc[1])%2 == 1:
+        if (self.loc[0]+self.loc[1])%2 == 0:
             return (185,122,87)
         else:
             return (250,250,250)
@@ -61,6 +61,9 @@ class Piece:
         else:
             return True
     
+    def getZone(self):
+        return self.zone
+
     def changePlace(self,zone,newZone):
         self.zone=newZone
         zone.removePiece(self)
@@ -92,17 +95,30 @@ def place(piece,zoneList,screen=screen):
 
 def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
     zone=getZone(sqSize,click,listloc,z)
-    validMove0=(Piece.zone.loc[0],Piece.zone.loc[1]-1)
-    validMove1=(Piece.zone.loc[0]+1,Piece.zone.loc[1]-1)
-    validMove2=(Piece.zone.loc[0]-1,Piece.zone.loc[1]-1)
-    print(validMove0)
-    print(validMove1)
-    print(validMove2)
-    if (zone.loc==validMove1 or zone.loc==validMove2) and zone.hasPiece():
+    validMove=[]
+    if Piece.isPlayer()==False:
+        validMove.append((Piece.zone.loc[0],Piece.zone.loc[1]+1))
+        validMove.append((Piece.zone.loc[0]+1,Piece.zone.loc[1]+1))
+        validMove.append((Piece.zone.loc[0]-1,Piece.zone.loc[1]+1))
+    else:
+        validMove.append((Piece.zone.loc[0],Piece.zone.loc[1]-1))
+        validMove.append((Piece.zone.loc[0]+1,Piece.zone.loc[1]-1))
+        validMove.append((Piece.zone.loc[0]-1,Piece.zone.loc[1]-1))
+    if (zone.loc==validMove[1] or zone.loc==validMove[2]) and zone.hasPiece():
+        zone.removePiece(zone.getPiece())
+        Piece.changeColor(Piece.getZone().zoneColor())
+        Piece.draw()
+        Piece.changePlace(Piece.zone,zone)
+        if Piece.isPlayer():
+            Piece.changeColor((0,0,250))
+        else:
+            Piece.changeColor((0,0,0))
+        Piece.draw()
+        moved=True
         write("Moved!",1000)
-    if (zone.loc==validMove0) and zone.hasPiece()==False:
+    elif (zone.loc==validMove[0]) and zone.hasPiece()==False:
         #Piece.zone.removePiece(Piece)
-        Piece.changeColor(zone.zoneColor())
+        Piece.changeColor(Piece.getZone().zoneColor())
         Piece.draw()
         Piece.changePlace(Piece.zone,zone)
         if Piece.isPlayer():
@@ -183,9 +199,9 @@ def main():
                 if selectedPiece==[]:
                     if getZone(sqSize,click,listloc,z).hasPiece():
                         zone=getZone(sqSize,click,listloc,z)
-                        if zone.getPiece()[0].isPlayer():
-                            selectPiece(zone,zone.getPiece()[0])
-                            selectedPiece=zone.getPiece()[0]
+                        if zone.getPiece().isPlayer():
+                            selectPiece(zone,zone.getPiece())
+                            selectedPiece=zone.getPiece()
                             write("choose where you want to move the selected piece",0)
                         else:
                             write("That's not your piece! Your's are BLUE!",1500) 
