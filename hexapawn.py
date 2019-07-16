@@ -23,6 +23,9 @@ class Zone:
     def hasPiece(self):
         return self.occupied
     
+    def getLoc(self):
+        return self.loc
+
     def getPiece(self):
         return self.piece[0]
     
@@ -67,7 +70,28 @@ class Piece:
         zone.removePiece(self)
         newZone.addPiece(self)
 
-        
+    def validMoves(self,zone,board=board):
+        valid=[]
+        loc=self.getZone().getLoc()
+        direction=0
+        if self.isPlayer==False:
+            direction=1
+        elif self.isPlayer==True:
+            direction=-1
+        x=loc[0]
+        y=loc[1]+direction
+        type(zone)
+        if y<board and y>=0 and zone[x+y*board].hasPiece()==False:
+            valid.append((x,y))
+        x=loc[0]+1
+        y=loc[1]+direction
+        if x<board and y<=board and y>=0 and zone[x+y*board].hasPiece():
+            valid.append((x,y))
+        x=loc[0]-1
+        y=loc[1]+direction
+        if x>=0 and y<board and y>=0 and zone[x+y*board].hasPiece():
+            valid.append((x,y))
+        return valid
 
 def write(text,wait,size=size,screen=screen):
     screen.fill((250,250,0),(0,size[5],size[6],size[7]))
@@ -182,11 +206,6 @@ def main():
     pygame.draw.rect(screen,(185,122,87),(240,240,120,120))
     sqSize=size[4]
     
-    #screen.blit(image,(0,0))
-    #listloc=[(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
-    
-    
-    
     # Text at the bottom
     pygame.font.init()
     #create tiles objects
@@ -213,6 +232,7 @@ def main():
                         if zone.getPiece().isPlayer():
                             selectPiece(zone,zone.getPiece())
                             selectedPiece=zone.getPiece()
+                            print(selectedPiece.validMoves(z))
                             write("choose where you want to move the selected piece",0)
                         else:
                             write("That's not your piece! Your's are BLUE!",1500) 
