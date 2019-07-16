@@ -2,10 +2,10 @@
 import pygame
 
 #Change game directory and size accordingly
-direc = r"C:\Users\filip\Documents\python codes\hexapawn\local"     #desktop location
-#direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
-size=(720,770,120,360,600,120,725,720,100,60,35)                   #default size
-#size=[360,385,60,180,300,60,365,360,50,30,17]                       #mini size
+#direc = r"C:\Users\filip\Documents\python codes\hexapawn\local"     #desktop location
+direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
+#size=(720,770,120,360,600,120,725,720,100,60,35)                   #default size
+size=[360,385,60,180,300,60,365,360,50,30,17]                       #mini size
 
 #Using "screen" here take some boot time for the game, but makes the code shorter
 
@@ -133,7 +133,37 @@ def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
         write("Invalid Move!",2000)
     return moved
 
+def checkVictory(z):
+    for i in z:
+        if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer():
+            write("victory :D Congratulations!!!",3000)
+            initiate(z)
+        elif i.loc[1]==2 and i.hasPiece() and i.getPiece().isPlayer()==False:
+            write("Defeat :( Better luck next time!",3000)
+            initiate(z)
 
+def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
+    for i in z:
+        if i.hasPiece():
+            i.removePiece(i.getPiece())
+        else:
+            pass
+
+    pc0=Piece(z,0,black)
+    pc1=Piece(z,1,black)
+    pc2=Piece(z,2,black)
+    pl0=Piece(z,6,blue)
+    pl1=Piece(z,7,blue)
+    pl2=Piece(z,8,blue)
+    
+    place(pc0,z)
+    place(pc1,z)
+    place(pc2,z)
+    place(pl0,z)
+    place(pl1,z)
+    place(pl2,z)
+    write("Choose the piece you want to move",0)
+    return z
 
 # define a main function
 def main():
@@ -154,37 +184,21 @@ def main():
     #image.convert()
     pos=[size[2],size[3],size[4]]
     sqSize=size[5]
-    black=(0,0,0)
-    blue=(0,0,250)
-    yellow=(250,250,0)
+    
     screen.blit(image,(0,0))
     listloc=[(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
-    write("Choose the piece you want to move",0)
     
     
+    
+    # Text at the bottom
+    pygame.font.init()
     #create tiles objects
     z=[]
     for x in range (0,9):   
         z.append(Zone(listloc[x],sqSize))
     
-
-    # Text at the bottom
-    pygame.font.init()
+    initiate(z)
     
-
-    pc0=Piece(z,0,black)
-    pc1=Piece(z,1,black)
-    pc2=Piece(z,2,black)
-    pl0=Piece(z,6,blue)
-    pl1=Piece(z,7,blue)
-    pl2=Piece(z,8,blue)
-    
-    place(pc0,z)
-    place(pc1,z)
-    place(pc2,z)
-    place(pl0,z)
-    place(pl1,z)
-    place(pl2,z)
     
      
     # define a variable to control the main loop
@@ -211,9 +225,10 @@ def main():
                         write("choose the piece you want to move",0)    
                 else:
                     moved=movePiece(selectedPiece,listloc,click,z,sqSize)
-                    if moved==True:
+                    if moved==True:                        
                         write("wait for your turn",0)
                         selectedPiece=[]
+                        checkVictory(z)
                     else:
                         write("choose where you want to move the selected piece",0)
 
