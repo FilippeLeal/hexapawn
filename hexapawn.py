@@ -4,8 +4,8 @@ import pygame
 #Change game directory and size accordingly
 #direc = r"C:\Users\filip\Documents\python codes\hexapawn\local"     #desktop location
 direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
-#size=(720,770,120,360,600,120,725,720,100,60,35)                   #default size
-size=[360,385,60,180,300,60,365,360,50,30,17]                       #mini size
+#size=(720,770,240,480,120,720,720,100,60,35)                   #default size
+size=[360,385,120,240,60,360,360,50,30,17]                       #mini size
 
 #Using "screen" here take some boot time for the game, but makes the code shorter
 
@@ -39,7 +39,7 @@ class Zone:
         if (self.loc[0]+self.loc[1])%2 == 0:
             return (185,122,87)
         else:
-            return (250,250,250)
+            return (255,255,255)
 
 
 class Piece:
@@ -50,7 +50,7 @@ class Piece:
         self.selected=False
 
     def draw(self,screen=screen,size=size):
-        pygame.draw.circle(screen, self.color, self.zone.center, size[9])
+        pygame.draw.circle(screen, self.color, self.zone.center, size[8])
     
     def changeColor(self,color):
         self.color=color
@@ -72,8 +72,8 @@ class Piece:
         
 
 def write(text,wait,size=size,screen=screen):
-    screen.fill((255,255,255),(0,size[6],size[7],size[8]))
-    screen.blit(pygame.font.SysFont('Arial', size[10]).render(text, False, (0, 0, 255)),(0,size[6]))
+    screen.fill((255,255,255),(0,size[5],size[6],size[7]))
+    screen.blit(pygame.font.SysFont('Arial', size[9]).render(text, False, (0, 0, 255)),(0,size[5]))
     pygame.display.update()
     pygame.time.wait(wait)
     
@@ -90,8 +90,6 @@ def selectPiece(z,piece,screen=screen):
 def place(piece,zoneList,screen=screen):
     zoneList[piece.sqr].addPiece(piece)
     piece.draw(screen)    
-
-
 
 def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
     zone=getZone(sqSize,click,listloc,z)
@@ -169,7 +167,7 @@ def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
 def main():
      
     # initialize the pygame module
-    pygame.init()
+    #pygame.init()
     # load and set the logo
     logo = pygame.image.load(direc+"\\pawn.png")
     pygame.display.set_icon(logo)
@@ -178,14 +176,16 @@ def main():
     # create a surface on screen that has the size of board
     
     
-    screen.fill((255,255,255))
-    image = pygame.image.load(direc+"\\tiles.png")
-    image=pygame.transform.scale(image,(size[0],size[1]))
-    #image.convert()
+    screen.fill((220,220,220))
+    pygame.draw.rect(screen,(185,122,87),(0,0,120,120))
+    pygame.draw.rect(screen,(185,122,87),(240,0,120,120))
+    pygame.draw.rect(screen,(185,122,87),(120,120,120,120))
+    pygame.draw.rect(screen,(185,122,87),(0,240,120,120))
+    pygame.draw.rect(screen,(185,122,87),(240,240,120,120))
     pos=[size[2],size[3],size[4]]
-    sqSize=size[5]
+    sqSize=size[4]
     
-    screen.blit(image,(0,0))
+    #screen.blit(image,(0,0))
     listloc=[(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
     
     
