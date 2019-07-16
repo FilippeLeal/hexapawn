@@ -6,7 +6,7 @@ import pygame
 direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
 #size=(720,770,240,480,120,720,720,100,60,35)                   #default size
 size=[360,385,120,240,60,360,360,50,30,17]                       #mini size
-
+board=3
 #Using "screen" here take some boot time for the game, but makes the code shorter
 
 screen = pygame.display.set_mode((size[0],size[1]))
@@ -43,11 +43,12 @@ class Zone:
 
 
 class Piece:
-    def __init__(self,zone,sqr,color):
+    def __init__(self,zone,sqr,color,controled):
         self.zone=zone[sqr]
         self.sqr=sqr
         self.color=color
         self.selected=False
+        self.player=controled
 
     def draw(self,screen=screen,size=size):
         pygame.draw.circle(screen, self.color, self.zone.center, size[8])
@@ -56,10 +57,7 @@ class Piece:
         self.color=color
     
     def isPlayer(self):
-        if self.color==(0,0,0):
-            return False
-        else:
-            return True
+        return self.player
     
     def getZone(self):
         return self.zone
@@ -72,15 +70,16 @@ class Piece:
         
 
 def write(text,wait,size=size,screen=screen):
-    screen.fill((255,255,255),(0,size[5],size[6],size[7]))
+    screen.fill((250,250,0),(0,size[5],size[6],size[7]))
     screen.blit(pygame.font.SysFont('Arial', size[9]).render(text, False, (0, 0, 255)),(0,size[5]))
     pygame.display.update()
     pygame.time.wait(wait)
     
-def getZone(sqSize, where,listloc,z):
+def getZone(sqSize, where,z):
     xZone=int(where[0]/sqSize/2)
     yZone=int(where[1]/sqSize/2)
-    return z[listloc.index((xZone,yZone))]
+    index=xZone+yZone*board
+    return z[index]
 
 def selectPiece(z,piece,screen=screen):
     piece.changeColor((255,255,0))
@@ -91,8 +90,8 @@ def place(piece,zoneList,screen=screen):
     zoneList[piece.sqr].addPiece(piece)
     piece.draw(screen)    
 
-def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
-    zone=getZone(sqSize,click,listloc,z)
+def movePiece(Piece,click,z,sqSize,screen=screen):
+    zone=getZone(sqSize,click,z)
     validMove=[]
     if Piece.isPlayer()==False:
         validMove.append((Piece.zone.loc[0],Piece.zone.loc[1]+1))
@@ -115,7 +114,6 @@ def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
         moved=True
         write("Moved!",1000)
     elif (zone.loc==validMove[0]) and zone.hasPiece()==False:
-        #Piece.zone.removePiece(Piece)
         Piece.changeColor(Piece.getZone().zoneColor())
         Piece.draw()
         Piece.changePlace(Piece.zone,zone)
@@ -134,10 +132,10 @@ def movePiece(Piece,listloc,click,z,sqSize,screen=screen):
 def checkVictory(z):
     for i in z:
         if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer():
-            write("victory :D Congratulations!!!",3000)
+            write("victory!!! Congratulations!!!  :D",3000)
             initiate(z)
         elif i.loc[1]==2 and i.hasPiece() and i.getPiece().isPlayer()==False:
-            write("Defeat :( Better luck next time!",3000)
+            write("Defeat!!! Better luck next time!  :(",3000)
             initiate(z)
 
 def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
@@ -146,22 +144,22 @@ def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
             i.removePiece(i.getPiece())
         else:
             pass
-
-    pc0=Piece(z,0,black)
-    pc1=Piece(z,1,black)
-    pc2=Piece(z,2,black)
-    pl0=Piece(z,6,blue)
-    pl1=Piece(z,7,blue)
-    pl2=Piece(z,8,blue)
+    p=[]
+    p.append(Piece(z,0,black,False))
+    p.append(Piece(z,1,black,False))
+    p.append(Piece(z,2,black,False))
+    p.append(Piece(z,6,blue,True))
+    p.append(Piece(z,7,blue,True))
+    p.append(Piece(z,8,blue,True))
     
-    place(pc0,z)
-    place(pc1,z)
-    place(pc2,z)
-    place(pl0,z)
-    place(pl1,z)
-    place(pl2,z)
+    for i in p:
+        place(i,z)
+    
     write("Choose the piece you want to move",0)
     return z
+
+#def PcTurn():
+
 
 # define a main function
 def main():
@@ -176,17 +174,16 @@ def main():
     # create a surface on screen that has the size of board
     
     
-    screen.fill((220,220,220))
+    screen.fill((250,250,250))
     pygame.draw.rect(screen,(185,122,87),(0,0,120,120))
     pygame.draw.rect(screen,(185,122,87),(240,0,120,120))
     pygame.draw.rect(screen,(185,122,87),(120,120,120,120))
     pygame.draw.rect(screen,(185,122,87),(0,240,120,120))
     pygame.draw.rect(screen,(185,122,87),(240,240,120,120))
-    pos=[size[2],size[3],size[4]]
     sqSize=size[4]
     
     #screen.blit(image,(0,0))
-    listloc=[(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
+    #listloc=[(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
     
     
     
@@ -195,7 +192,7 @@ def main():
     #create tiles objects
     z=[]
     for x in range (0,9):   
-        z.append(Zone(listloc[x],sqSize))
+        z.append(Zone((x%board,int(x/board)),sqSize))
     
     initiate(z)
     
@@ -211,8 +208,8 @@ def main():
             if pygame.mouse.get_pressed()[0]==1:
                 click=pygame.mouse.get_pos()
                 if selectedPiece==[]:
-                    if getZone(sqSize,click,listloc,z).hasPiece():
-                        zone=getZone(sqSize,click,listloc,z)
+                    if getZone(sqSize,click,z).hasPiece():
+                        zone=getZone(sqSize,click,z)
                         if zone.getPiece().isPlayer():
                             selectPiece(zone,zone.getPiece())
                             selectedPiece=zone.getPiece()
@@ -224,11 +221,12 @@ def main():
                         write("There's no piece at this location!!!",1500) 
                         write("choose the piece you want to move",0)    
                 else:
-                    moved=movePiece(selectedPiece,listloc,click,z,sqSize)
+                    moved=movePiece(selectedPiece,click,z,sqSize)
                     if moved==True:                        
                         write("wait for your turn",0)
                         selectedPiece=[]
                         checkVictory(z)
+                        #PcTurn()
                     else:
                         write("choose where you want to move the selected piece",0)
 
