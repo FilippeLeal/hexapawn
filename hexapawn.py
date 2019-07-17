@@ -74,10 +74,11 @@ class Piece:
         valid=[]
         loc=self.getZone().getLoc()
         direction=0
-        if self.isPlayer==False:
+        if self.isPlayer()==False:
             direction=1
-        elif self.isPlayer==True:
+        elif self.isPlayer()==True:
             direction=-1
+        print(direction)
         x=loc[0]
         y=loc[1]+direction
         type(zone)
@@ -85,14 +86,22 @@ class Piece:
             valid.append((x,y))
         x=loc[0]+1
         y=loc[1]+direction
-        if x<board and y<=board and y>=0 and zone[x+y*board].hasPiece():
+        if x<board and y<=board and y>=0 and zone[x+y*board].hasPiece()==True:
             valid.append((x,y))
         x=loc[0]-1
         y=loc[1]+direction
-        if x>=0 and y<board and y>=0 and zone[x+y*board].hasPiece():
+        if x>=0 and y<board and y>=0 and zone[x+y*board].hasPiece()==True:
             valid.append((x,y))
         return valid
 
+def drawBoard():
+    screen.fill((250,250,250))
+    pygame.draw.rect(screen,(185,122,87),(0,0,120,120))
+    pygame.draw.rect(screen,(185,122,87),(240,0,120,120))
+    pygame.draw.rect(screen,(185,122,87),(120,120,120,120))
+    pygame.draw.rect(screen,(185,122,87),(0,240,120,120))
+    pygame.draw.rect(screen,(185,122,87),(240,240,120,120))
+    
 def write(text,wait,size=size,screen=screen):
     screen.fill((250,250,0),(0,size[5],size[6],size[7]))
     screen.blit(pygame.font.SysFont('Arial', size[9]).render(text, False, (0, 0, 255)),(0,size[5]))
@@ -163,6 +172,7 @@ def checkVictory(z):
             initiate(z)
 
 def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
+    drawBoard()
     for i in z:
         if i.hasPiece():
             i.removePiece(i.getPiece())
@@ -197,13 +207,7 @@ def main():
      
     # create a surface on screen that has the size of board
     
-    
-    screen.fill((250,250,250))
-    pygame.draw.rect(screen,(185,122,87),(0,0,120,120))
-    pygame.draw.rect(screen,(185,122,87),(240,0,120,120))
-    pygame.draw.rect(screen,(185,122,87),(120,120,120,120))
-    pygame.draw.rect(screen,(185,122,87),(0,240,120,120))
-    pygame.draw.rect(screen,(185,122,87),(240,240,120,120))
+        
     sqSize=size[4]
     
     # Text at the bottom
@@ -249,7 +253,7 @@ def main():
                         #PcTurn()
                     else:
                         write("choose where you want to move the selected piece",0)
-
+            
                     
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
