@@ -10,6 +10,7 @@ board=3
 #Using "screen" here take some boot time for the game, but makes the code shorter
 
 screen = pygame.display.set_mode((size[0],size[1]))
+p=[]
 ### Implementar métodos gerais usando métodos de cada classe separadamente para as ações
 
 class Zone:
@@ -35,7 +36,7 @@ class Zone:
 
     
     def removePiece(self,piece):
-        self.piece.remove(piece)
+        self.piece.clear()
         self.occupied=False
 
     def zoneColor(self):
@@ -78,7 +79,6 @@ class Piece:
             direction=1
         elif self.isPlayer()==True:
             direction=-1
-        print(direction)
         x=loc[0]
         y=loc[1]+direction
         type(zone)
@@ -87,11 +87,13 @@ class Piece:
         x=loc[0]+1
         y=loc[1]+direction
         if x<board and y<=board and y>=0 and zone[x+y*board].hasPiece()==True:
-            valid.append((x,y))
+            if zone[x+y*board].getPiece().isPlayer()!=self.isPlayer():
+                valid.append((x,y))
         x=loc[0]-1
         y=loc[1]+direction
         if x>=0 and y<board and y>=0 and zone[x+y*board].hasPiece()==True:
-            valid.append((x,y))
+            if zone[x+y*board].getPiece().isPlayer()!=self.isPlayer():
+                valid.append((x,y))
         return valid
 
 def drawBoard():
@@ -123,53 +125,49 @@ def place(piece,zoneList,screen=screen):
     zoneList[piece.sqr].addPiece(piece)
     piece.draw(screen)    
 
-def movePiece(Piece,click,z,sqSize,screen=screen):
-    zone=getZone(sqSize,click,z)
-    validMove=[]
-    if Piece.isPlayer()==False:
-        validMove.append((Piece.zone.loc[0],Piece.zone.loc[1]+1))
-        validMove.append((Piece.zone.loc[0]+1,Piece.zone.loc[1]+1))
-        validMove.append((Piece.zone.loc[0]-1,Piece.zone.loc[1]+1))
-    else:
-        validMove.append((Piece.zone.loc[0],Piece.zone.loc[1]-1))
-        validMove.append((Piece.zone.loc[0]+1,Piece.zone.loc[1]-1))
-        validMove.append((Piece.zone.loc[0]-1,Piece.zone.loc[1]-1))
-    if (zone.loc==validMove[1] or zone.loc==validMove[2]) and zone.hasPiece():
-        zone.removePiece(zone.getPiece())
-        Piece.changeColor(Piece.getZone().zoneColor())
-        Piece.draw()
-        Piece.changePlace(Piece.zone,zone)
-        if Piece.isPlayer():
-            Piece.changeColor((0,0,250))
+def movePiece(Piece,zone,zlist,sqSize,p,screen=screen):
+    #zone=getZone(sqSize,click,z)
+    validMove=Piece.validMoves(zlist)
+    if zone.loc in validMove:
+        if zone.hasPiece()==True:
+            erase=zone.getPiece()
+            zone.removePiece(erase)
+            p.remove(erase)
+            Piece.changeColor(Piece.getZone().zoneColor())
+            Piece.draw()
+            Piece.changePlace(Piece.zone,zone)
+            if Piece.isPlayer():
+                Piece.changeColor((0,0,250))
+            else:
+                Piece.changeColor((0,0,0))
+            Piece.draw()
+            moved=True
+            write("Moved!",1000)
         else:
-            Piece.changeColor((0,0,0))
-        Piece.draw()
-        moved=True
-        write("Moved!",1000)
-    elif (zone.loc==validMove[0]) and zone.hasPiece()==False:
-        Piece.changeColor(Piece.getZone().zoneColor())
-        Piece.draw()
-        Piece.changePlace(Piece.zone,zone)
-        if Piece.isPlayer():
-            Piece.changeColor((0,0,250))
-        else:
-            Piece.changeColor((0,0,0))
-        Piece.draw()
-        moved=True
-        write("Moved!",1000)
+            Piece.changeColor(Piece.getZone().zoneColor())
+            Piece.draw()
+            Piece.changePlace(Piece.zone,zone)
+            if Piece.isPlayer():
+                Piece.changeColor((0,0,250))
+            else:
+                Piece.changeColor((0,0,0))
+            Piece.draw()
+            moved=True
+            write("Moved!",1000)
     else:
         moved=False
         write("Invalid Move!",2000)
     return moved
 
-def checkVictory(z):
+def checkVictory(z,p):
     for i in z:
         if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer():
             write("victory!!! Congratulations!!!  :D",3000)
-            initiate(z)
+            z,p=initiate(z)
         elif i.loc[1]==2 and i.hasPiece() and i.getPiece().isPlayer()==False:
             write("Defeat!!! Better luck next time!  :(",3000)
-            initiate(z)
+            z,p=initiate(z)
+    return z,p
 
 def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     drawBoard()
@@ -190,10 +188,18 @@ def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
         place(i,z)
     
     write("Choose the piece you want to move",0)
-    return z
+    return z,p
 
-#def PcTurn():
-
+def PcTurn(p,z):
+    pcPieces=[]
+    pcMoves=[]
+    for i in p:
+        if i.isPlayer()==False:
+            pcPieces.append(i)
+    for i2 in pcPieces:
+        pcMoves[pcPieces.index(i2)].append(i2.validMoves(z))
+    print(len(pcMoves))
+    print(pcMoves)
 
 # define a main function
 def main():
@@ -217,7 +223,8 @@ def main():
     for x in range (0,9):   
         z.append(Zone((x%board,int(x/board)),sqSize))
     
-    initiate(z)
+    z,p=initiate(z)
+    
     
     
      
@@ -236,7 +243,7 @@ def main():
                         if zone.getPiece().isPlayer():
                             selectPiece(zone,zone.getPiece())
                             selectedPiece=zone.getPiece()
-                            print(selectedPiece.validMoves(z))
+                            print("valid=",selectedPiece.validMoves(z))
                             write("choose where you want to move the selected piece",0)
                         else:
                             write("That's not your piece! Your's are BLUE!",1500) 
@@ -245,12 +252,12 @@ def main():
                         write("There's no piece at this location!!!",1500) 
                         write("choose the piece you want to move",0)    
                 else:
-                    moved=movePiece(selectedPiece,click,z,sqSize)
+                    moved=movePiece(selectedPiece,getZone(sqSize,click,z),z,sqSize,p)
                     if moved==True:                        
                         write("wait for your turn",0)
                         selectedPiece=[]
-                        checkVictory(z)
-                        #PcTurn()
+                        z,p=checkVictory(z,p)
+                        PcTurn(p,z)
                     else:
                         write("choose where you want to move the selected piece",0)
             
