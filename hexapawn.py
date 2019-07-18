@@ -87,7 +87,7 @@ class Piece:
             valid.append((x,y))
         x=loc[0]+1
         y=loc[1]+direction
-        if x<board and y<=board and y>=0 and zone[x+y*board].hasPiece()==True:
+        if x<board and y<board and y>=0 and zone[x+y*board].hasPiece()==True:
             if zone[x+y*board].getPiece().isPlayer()!=self.isPlayer():
                 valid.append((x,y))
         x=loc[0]-1
@@ -160,15 +160,21 @@ def movePiece(Piece,zone,zlist,sqSize,p,screen=screen):
         write("Invalid Move!",2000)
     return moved
 
-def checkVictory(z,p,noMoves):
+def checkVictory(z,p,winner="no one"):
+    gameOver=False
     for i in z:
-        if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer() or noMoves==True:
-            write("victory!!! Congratulations!!!  :D",3000)
-            z,p=initiate(z)
+        if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer():
+            winner="player"
         elif i.loc[1]==2 and i.hasPiece() and i.getPiece().isPlayer()==False:
+            winner="CPU"
+    if winner!="no one":
+        gameOver=True
+        z,p=initiate(z)
+        if winner=="player":
+            write("victory!!! Congratulations!!!  :D",3000)
+        elif winner=="CPU":
             write("Defeat!!! Better luck next time!  :(",3000)
-            z,p=initiate(z)
-    return z,p
+    return gameOver
 
 def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     drawBoard()
@@ -178,6 +184,7 @@ def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
         else:
             pass
     p=[]
+    print("game set")
     p.append(Piece(z,0,black,False))
     p.append(Piece(z,1,black,False))
     p.append(Piece(z,2,black,False))
@@ -192,6 +199,7 @@ def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     return z,p
 
 def PcTurn(p,zlist,sqsize=sqSize,screen=screen,board=board):
+    gameOver=False
     pcPieces=[]
     pcMoves=[]
     noMoves=True
@@ -206,16 +214,18 @@ def PcTurn(p,zlist,sqsize=sqSize,screen=screen,board=board):
             noMoves=False
         
     if noMoves==True:
-        checkVictory(zlist,p,noMoves)
+        print("here")
+        gameOver=checkVictory(zlist,p,"player")
     else:
         while valid==False:
             a=random.randrange(len(pcMoves))
             if pcMoves[a]!=[]:
                 valid=True
         b=random.randrange(len(pcMoves[a]))
+        print("pc target=",pcMoves[a][b])
         targetZone=zlist[pcMoves[a][b][0]+pcMoves[a][b][1]*board]
         movePiece(pcPieces[a],targetZone,zlist,sqSize,p)
-
+    return zlist,p,gameOver
 
 # define a main function
 def main():
@@ -271,8 +281,10 @@ def main():
                     if moved==True:                        
                         write("wait for your turn",0)
                         selectedPiece=[]
-                        z,p=checkVictory(z,p,False)
-                        PcTurn(p,z)
+                        gameOver=checkVictory(z,p)
+                        if gameOver==False:
+                            z,p,pcNoMoves=PcTurn(p,z)
+                            gameOver=checkVictory(z,p)
                     else:
                         write("choose where you want to move the selected piece",0)
             
