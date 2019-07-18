@@ -1,12 +1,13 @@
 # import the pygame module, so you can use it
 import pygame
-
+import random
 #Change game directory and size accordingly
 #direc = r"C:\Users\filip\Documents\python codes\hexapawn\local"     #desktop location
 direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
 #size=(720,770,240,480,120,720,720,100,60,35)                   #default size
 size=[360,385,120,240,60,360,360,50,30,17]                       #mini size
 board=3
+sqSize=size[4]
 #Using "screen" here take some boot time for the game, but makes the code shorter
 
 screen = pygame.display.set_mode((size[0],size[1]))
@@ -159,9 +160,9 @@ def movePiece(Piece,zone,zlist,sqSize,p,screen=screen):
         write("Invalid Move!",2000)
     return moved
 
-def checkVictory(z,p):
+def checkVictory(z,p,noMoves):
     for i in z:
-        if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer():
+        if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer() or noMoves==True:
             write("victory!!! Congratulations!!!  :D",3000)
             z,p=initiate(z)
         elif i.loc[1]==2 and i.hasPiece() and i.getPiece().isPlayer()==False:
@@ -190,16 +191,31 @@ def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     write("Choose the piece you want to move",0)
     return z,p
 
-def PcTurn(p,z):
+def PcTurn(p,zlist,sqsize=sqSize,screen=screen,board=board):
     pcPieces=[]
     pcMoves=[]
+    noMoves=True
+    valid=False
     for i in p:
         if i.isPlayer()==False:
             pcPieces.append(i)
     for i2 in pcPieces:
-        pcMoves[pcPieces.index(i2)].append(i2.validMoves(z))
-    print(len(pcMoves))
-    print(pcMoves)
+        pcMoves.append(i2.validMoves(zlist))
+    for i3 in pcMoves:
+        if pcMoves[pcMoves.index(i3)]!=[]:
+            noMoves=False
+        
+    if noMoves==True:
+        checkVictory(zlist,p,noMoves)
+    else:
+        while valid==False:
+            a=random.randrange(len(pcMoves))
+            if pcMoves[a]!=[]:
+                valid=True
+        b=random.randrange(len(pcMoves[a]))
+        targetZone=zlist[pcMoves[a][b][0]+pcMoves[a][b][1]*board]
+        movePiece(pcPieces[a],targetZone,zlist,sqSize,p)
+
 
 # define a main function
 def main():
@@ -214,7 +230,7 @@ def main():
     # create a surface on screen that has the size of board
     
         
-    sqSize=size[4]
+    
     
     # Text at the bottom
     pygame.font.init()
@@ -243,7 +259,6 @@ def main():
                         if zone.getPiece().isPlayer():
                             selectPiece(zone,zone.getPiece())
                             selectedPiece=zone.getPiece()
-                            print("valid=",selectedPiece.validMoves(z))
                             write("choose where you want to move the selected piece",0)
                         else:
                             write("That's not your piece! Your's are BLUE!",1500) 
@@ -256,7 +271,7 @@ def main():
                     if moved==True:                        
                         write("wait for your turn",0)
                         selectedPiece=[]
-                        z,p=checkVictory(z,p)
+                        z,p=checkVictory(z,p,False)
                         PcTurn(p,z)
                     else:
                         write("choose where you want to move the selected piece",0)
