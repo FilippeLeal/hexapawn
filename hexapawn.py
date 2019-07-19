@@ -9,7 +9,8 @@ size=[360,385,120,240,60,360,360,50,30,17]                       #mini size
 board=3
 sqSize=size[4]
 #Using "screen" here take some boot time for the game, but makes the code shorter
-
+pygame.mixer.init()
+victory = pygame.mixer.Sound(r"C:\Users\Filippe\Documents\GitHub\hexapawn\victory.wav")
 screen = pygame.display.set_mode((size[0],size[1]))
 p=[]
 ### Implementar métodos gerais usando métodos de cada classe separadamente para as ações
@@ -29,7 +30,7 @@ class Zone:
         return self.loc
 
     def getPiece(self):
-        return self.piece[0]
+        return self.piece[0] 
     
     def addPiece(self,piece):
         self.piece.append(piece)
@@ -132,8 +133,9 @@ def movePiece(Piece,zone,zlist,sqSize,p,screen=screen):
     if zone.loc in validMove:
         if zone.hasPiece()==True:
             erase=zone.getPiece()
-            zone.removePiece(erase)
             p.remove(erase)
+            zone.removePiece(erase)
+            
             Piece.changeColor(Piece.getZone().zoneColor())
             Piece.draw()
             Piece.changePlace(Piece.zone,zone)
@@ -170,28 +172,30 @@ def checkVictory(z,p,winner="no one"):
     if winner!="no one":
         gameOver=True
         z,p=initiate(z)
+        print("game set!")
         if winner=="player":
+            
+            pygame.mixer.Sound.play(victory)
             write("victory!!! Congratulations!!!  :D",3000)
         elif winner=="CPU":
             write("Defeat!!! Better luck next time!  :(",3000)
     return gameOver
 
-def initiate(z,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
+def initiate(z,p=p,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     drawBoard()
+    
     for i in z:
         if i.hasPiece():
             i.removePiece(i.getPiece())
-        else:
-            pass
-    p=[]
-    print("game set")
+    
+    p.clear()
     p.append(Piece(z,0,black,False))
     p.append(Piece(z,1,black,False))
     p.append(Piece(z,2,black,False))
     p.append(Piece(z,6,blue,True))
     p.append(Piece(z,7,blue,True))
     p.append(Piece(z,8,blue,True))
-    
+    print(len(p))
     for i in p:
         place(i,z)
     
@@ -206,16 +210,17 @@ def PcTurn(p,zlist,sqsize=sqSize,screen=screen,board=board):
     valid=False
     for i in p:
         if i.isPlayer()==False:
+            print("location:",i.getZone().getLoc())
             pcPieces.append(i)
     for i2 in pcPieces:
         pcMoves.append(i2.validMoves(zlist))
     for i3 in pcMoves:
         if pcMoves[pcMoves.index(i3)]!=[]:
             noMoves=False
-        
+    print(pcMoves)
     if noMoves==True:
-        print("here")
-        gameOver=checkVictory(zlist,p,"player")
+        print("victory by immobilization")
+        checkVictory(zlist,p,"player")
     else:
         while valid==False:
             a=random.randrange(len(pcMoves))
@@ -225,7 +230,23 @@ def PcTurn(p,zlist,sqsize=sqSize,screen=screen,board=board):
         print("pc target=",pcMoves[a][b])
         targetZone=zlist[pcMoves[a][b][0]+pcMoves[a][b][1]*board]
         movePiece(pcPieces[a],targetZone,zlist,sqSize,p)
-    return zlist,p,gameOver
+    return zlist,p
+
+def checkNoMoves(zlist,plist):
+    noMoves=True
+    playerPieces=[]
+    playerMoves=[]
+    for i in p:
+        if i.isPlayer()==True:
+            print("location:",i.getZone().getLoc())
+            playerPieces.append(i)
+    for i2 in playerPieces:
+        playerMoves.append(i2.validMoves(zlist))
+    for i3 in playerMoves:
+        if playerMoves[playerMoves.index(i3)]!=[]:
+            noMoves=False
+    if noMoves==True:
+        checkVictory(zlist,plist,"CPU")
 
 # define a main function
 def main():
@@ -283,10 +304,13 @@ def main():
                         selectedPiece=[]
                         gameOver=checkVictory(z,p)
                         if gameOver==False:
-                            z,p,pcNoMoves=PcTurn(p,z)
+                            z,p=PcTurn(p,z)
                             gameOver=checkVictory(z,p)
+                            checkNoMoves(z,p)
                     else:
                         write("choose where you want to move the selected piece",0)
+                        
+
             
                     
             # only do something if the event is of type QUIT
