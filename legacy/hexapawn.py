@@ -9,8 +9,6 @@ size=[360,385,120,240,60,360,360,50,30,17]                       #mini size
 board=3
 sqSize=size[4]
 #Using "screen" here take some boot time for the game, but makes the code shorter
-pygame.mixer.init()
-victory = pygame.mixer.Sound(r"C:\Users\Filippe\Documents\GitHub\hexapawn\victory.wav")
 screen = pygame.display.set_mode((size[0],size[1]))
 p=[]
 ### Implementar métodos gerais usando métodos de cada classe separadamente para as ações
@@ -174,8 +172,6 @@ def checkVictory(z,p,winner="no one"):
         z,p=initiate(z)
         print("game set!")
         if winner=="player":
-            
-            pygame.mixer.Sound.play(victory)
             write("victory!!! Congratulations!!!  :D",3000)
         elif winner=="CPU":
             write("Defeat!!! Better luck next time!  :(",3000)
