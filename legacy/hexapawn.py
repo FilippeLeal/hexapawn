@@ -11,6 +11,8 @@ sqSize=size[4]
 #Using "screen" here take some boot time for the game, but makes the code shorter
 screen = pygame.display.set_mode((size[0],size[1]))
 p=[]
+movesHistory=[]
+defeatHistory=[]
 ### Implementar métodos gerais usando métodos de cada classe separadamente para as ações
 
 class Zone:
@@ -97,7 +99,7 @@ class Piece:
         return valid
 
 def drawBoard():
-    screen.fill((250,250,250))
+    screen.fill((255,255,255))
     pygame.draw.rect(screen,(185,122,87),(0,0,120,120))
     pygame.draw.rect(screen,(185,122,87),(240,0,120,120))
     pygame.draw.rect(screen,(185,122,87),(120,120,120,120))
@@ -108,7 +110,7 @@ def write(text,wait,size=size,screen=screen):
     screen.fill((250,250,0),(0,size[5],size[6],size[7]))
     screen.blit(pygame.font.SysFont('Arial', size[9]).render(text, False, (0, 0, 255)),(0,size[5]))
     pygame.display.update()
-    pygame.time.wait(wait)
+    #pygame.time.wait(wait)
     
 def getZone(sqSize, where,z):
     xZone=int(where[0]/sqSize/2)
@@ -125,10 +127,12 @@ def place(piece,zoneList,screen=screen):
     zoneList[piece.sqr].addPiece(piece)
     piece.draw(screen)    
 
-def movePiece(Piece,zone,zlist,sqSize,p,screen=screen):
+def movePiece(Piece,zone,zlist,sqSize,p,movesHistory=movesHistory,screen=screen):
     #zone=getZone(sqSize,click,z)
     validMove=Piece.validMoves(zlist)
     if zone.loc in validMove:
+        movesHistory.append(zone.loc)
+        print("moves",movesHistory)
         if zone.hasPiece()==True:
             erase=zone.getPiece()
             p.remove(erase)
@@ -158,9 +162,9 @@ def movePiece(Piece,zone,zlist,sqSize,p,screen=screen):
     else:
         moved=False
         write("Invalid Move!",2000)
-    return moved
+    return moved,movesHistory
 
-def checkVictory(z,p,winner="no one"):
+def checkVictory(z,p,winner="no one",defeatHistory=defeatHistory,movesHistory=movesHistory):
     gameOver=False
     for i in z:
         if i.loc[1]==0 and i.hasPiece() and i.getPiece().isPlayer():
@@ -169,17 +173,21 @@ def checkVictory(z,p,winner="no one"):
             winner="CPU"
     if winner!="no one":
         gameOver=True
-        z,p=initiate(z)
-        print("game set!")
         if winner=="player":
             write("victory!!! Congratulations!!!  :D",3000)
+            defeatHistory.append(movesHistory)
+            print(defeatHistory)
+            print(len(defeatHistory))
         elif winner=="CPU":
             write("Defeat!!! Better luck next time!  :(",3000)
-    return gameOver
+        z,p,movesHistory=initiate(z)
+        print("moves history:",movesHistory)
+    return gameOver,defeatHistory,movesHistory
 
 def initiate(z,p=p,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     drawBoard()
-    
+    movesHistory=[]
+    print("initiate",movesHistory)
     for i in z:
         if i.hasPiece():
             i.removePiece(i.getPiece())
@@ -191,42 +199,51 @@ def initiate(z,p=p,black=(0,0,0),blue=(0,0,250),yellow=(250,250,0)):
     p.append(Piece(z,6,blue,True))
     p.append(Piece(z,7,blue,True))
     p.append(Piece(z,8,blue,True))
-    print(len(p))
     for i in p:
         place(i,z)
     
     write("Choose the piece you want to move",0)
-    return z,p
+    return z,p,movesHistory
 
-def PcTurn(p,zlist,sqsize=sqSize,screen=screen,board=board):
-    gameOver=False
+def PcTurn(p,zlist,movesHistory=movesHistory,defeatHistory=defeatHistory,sqsize=sqSize,screen=screen,board=board):
     pcPieces=[]
     pcMoves=[]
     noMoves=True
     valid=False
+    dejavu=True
+  
     for i in p:
         if i.isPlayer()==False:
-            print("location:",i.getZone().getLoc())
             pcPieces.append(i)
     for i2 in pcPieces:
         pcMoves.append(i2.validMoves(zlist))
-    for i3 in pcMoves:
-        if pcMoves[pcMoves.index(i3)]!=[]:
-            noMoves=False
-    print(pcMoves)
-    if noMoves==True:
-        print("victory by immobilization")
-        checkVictory(zlist,p,"player")
-    else:
-        while valid==False:
-            a=random.randrange(len(pcMoves))
-            if pcMoves[a]!=[]:
-                valid=True
-        b=random.randrange(len(pcMoves[a]))
-        print("pc target=",pcMoves[a][b])
-        targetZone=zlist[pcMoves[a][b][0]+pcMoves[a][b][1]*board]
-        movePiece(pcPieces[a],targetZone,zlist,sqSize,p)
-    return zlist,p
+    while dejavu==True:
+        testmove=movesHistory.copy()
+        for i3 in pcMoves:
+            if pcMoves[pcMoves.index(i3)]!=[]:
+                noMoves=False
+        if noMoves==True:
+            print("victory by immobilization")
+            gameOver,defeatHistory,movesHistory=checkVictory(zlist,p,"player")
+            dejavu=False
+        else:
+            while valid==False:
+                a=random.randrange(len(pcMoves))
+                if pcMoves[a]!=[]:
+                    valid=True
+            b=random.randrange(len(pcMoves[a]))
+            testmove.append(pcMoves[a][b])
+            if defeatHistory in testmove:
+                print("dejavu")
+                dejavu=True
+                pcMoves[a].remove(b)
+            else:
+                dejavu=False
+                print("pc target=",pcMoves[a][b])
+            print(pcMoves)
+            targetZone=zlist[pcMoves[a][b][0]+pcMoves[a][b][1]*board]
+            moved,movesHistory=movePiece(pcPieces[a],targetZone,zlist,sqSize,p)
+    return zlist,p,movesHistory,defeatHistory
 
 def checkNoMoves(zlist,plist):
     noMoves=True
@@ -234,21 +251,19 @@ def checkNoMoves(zlist,plist):
     playerMoves=[]
     for i in p:
         if i.isPlayer()==True:
-            print("location:",i.getZone().getLoc())
             playerPieces.append(i)
     for i2 in playerPieces:
         playerMoves.append(i2.validMoves(zlist))
     for i3 in playerMoves:
         if playerMoves[playerMoves.index(i3)]!=[]:
             noMoves=False
-    if noMoves==True:
-        checkVictory(zlist,plist,"CPU")
+    return noMoves
 
 # define a main function
 def main():
      
     # initialize the pygame module
-    #pygame.init()
+    pygame.init()
     # load and set the logo
     logo = pygame.image.load(direc+"\\pawn.png")
     pygame.display.set_icon(logo)
@@ -266,16 +281,16 @@ def main():
     for x in range (0,9):   
         z.append(Zone((x%board,int(x/board)),sqSize))
     
-    z,p=initiate(z)
+    z,p,movesHistory=initiate(z)
     
-    
+    clock=pygame.time.Clock()
     
      
     # define a variable to control the main loop
     running = True
     selectedPiece=[] 
     # main loop
-    while running:
+    while running: 
         # event handling, gets all event from the event queue
         for event in pygame.event.get():
             if pygame.mouse.get_pressed()[0]==1:
@@ -294,15 +309,23 @@ def main():
                         write("There's no piece at this location!!!",1500) 
                         write("choose the piece you want to move",0)    
                 else:
-                    moved=movePiece(selectedPiece,getZone(sqSize,click,z),z,sqSize,p)
+                    print("MOVE",movesHistory)
+                    moved,movesHistory=movePiece(selectedPiece,getZone(sqSize,click,z),z,sqSize,p)
                     if moved==True:                        
                         write("wait for your turn",0)
                         selectedPiece=[]
-                        gameOver=checkVictory(z,p)
+                        gameOver,defeatHistory,movesHistory=checkVictory(z,p)
+                        print("aiai",movesHistory)
                         if gameOver==False:
-                            z,p=PcTurn(p,z)
-                            gameOver=checkVictory(z,p)
-                            checkNoMoves(z,p)
+                            clock.tick()
+                            z,p,movesHistory,defeatHistory=PcTurn(p,z)
+                            clock.tick()
+                            print("pcturntime:",clock.get_time())
+                            gameOver,defeatHistory,movesHistory=checkVictory(z,p)
+                            noMoves=checkNoMoves(z,p)
+                            if noMoves==True:
+                                print("defeat by immobilization")
+                                gameOver,defeatHistory,movesHistory=checkVictory(z,p,"CPU")
                     else:
                         write("choose where you want to move the selected piece",0)
                         
