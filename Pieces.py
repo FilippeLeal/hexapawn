@@ -6,30 +6,35 @@ class Pieces:
         self.type=type
         if controled=="player":
             self.color=(0,0,255)
-            self.front=1
+            self.front=-1
         else:
             self.color=(0,0,0)
-            self.front=-1
+            self.front=1
 
     def getLocation(self):
         return self.location
+
+    def setLocation(self,newloc):
+        self.location=newloc
+        if self.controled=="player":
+            self.color=(0,0,255)
+        else:
+            self.color=(0,0,0)
     
     def validMoves(self,plist,board):
-        valid=[( self.location[0],(self.location[1]+self.front) ), ( (self.location[0]-1) , (self.location[1]+self.front) ), ( (self.location[0]+1), (self.location[1]+self.front) )]
-        for i in valid:
-            if i[0] not in range(0,board) or i[1] not in range(0,board):
-                valid.remove(i)
-            else:
-                for i2 in plist:
-                    if i2.getLocation()==i:
-                        if i==0:
-                            valid.remove(i)
-                        elif i==1:
-                            valid1=True
-                        elif i==2:
-                            valid2=True
-                if valid1=False:
-                    valid.remove(1)
+        valid=[]
+        loc=self.location
+        listloc=[]
+        for i in plist:
+            listloc.append(i.location)
+        if loc[1]+self.front in range(0,board): 
+            if (loc[0],loc[1]+self.front) not in listloc:
+                valid.append((loc[0],loc[1]+self.front))
+            if loc[0]+1 in range(0,board) and (loc[0]+1,loc[1]+self.front) in listloc:
+                valid.append((loc[0]+1,loc[1]+self.front))
+            if loc[0]-1 in range(0,board) and (loc[0]-1,loc[1]+self.front) in listloc:
+                valid.append((loc[0]-1,loc[1]+self.front))
+        return valid
                             
                     
 
@@ -41,7 +46,7 @@ class Pieces:
 
     def setColor(self,newColor):
         self.color=newColor
-
+    
     def getController(self):
         return self.controled
 

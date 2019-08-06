@@ -18,7 +18,7 @@ def main():
     running = True
     isgameset=False
     turn = "player"
-    selectPiece=[]
+    selectedPiece=[]
 
     #the main Loop
     while running==True:
@@ -28,12 +28,15 @@ def main():
                 if turn=="player":
                     if pygame.mouse.get_pressed()[0]==1:
                         click=pygame.mouse.get_pos()
-                        target=getTileLocation(click,plist)
-                        if selectPiece=[]:
-                            selectedPiece=SelectPiece(target)
+                        target=getTileLocation(click,plist) 
+                        #target returns as the location if the tile is empty or the Piece obj occupying it
+                        if selectedPiece==[]:
+                            selectedPiece=selectPiece(target,size,screen,board)
                             write("Select the location that you want to move the piece!",0,size,screen)
                         if selectedPiece!=[]:
-                            
+                            selectedPiece=movePiece(selectedPiece,target,size,screen,board,plist)
+                            if selectedPiece!=[]:
+                                write("Invalid move!",1000,size,screen)
                             
                             
 

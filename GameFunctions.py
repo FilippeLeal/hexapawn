@@ -61,7 +61,7 @@ def getTileLocation(click,plist,board=board,size=size):
             target=i
     return target
 
-def selectPiece(piece,size,screen,board): 
+def selectPiece(target,size,screen,board): 
     selected=[]
     if type(target)==tuple:
         write("No Piece there!",1000,size,screen)
@@ -75,3 +75,23 @@ def selectPiece(piece,size,screen,board):
         pygame.display.update()
         selected=target
     return selected
+
+def movePiece(selectedPiece,target,size,screen,board,plist):
+    print(selectedPiece.validMoves(plist,board))
+    squareSize=int(size[0]/board)
+    brown=(185,122,87)
+    white=(255,255,255)
+    oldLoc=selectedPiece.getLocation()
+    if (oldLoc[0]+oldLoc[1])%2==0:
+        color=brown
+    else:
+        color=white
+    if target in selectedPiece.validMoves(plist,board):
+        pygame.draw.rect(screen,color,(int(oldLoc[0]*squareSize),int(oldLoc[1]*squareSize),squareSize,squareSize))
+        selectedPiece.setLocation(target)
+        selectedPiece.draw(screen,size,board)
+        pygame.display.update()
+        selectedPiece=[]
+    return selectedPiece
+
+    
