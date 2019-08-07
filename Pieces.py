@@ -50,7 +50,8 @@ class Pieces:
     def getController(self):
         return self.controled
 
-    def draw(self,screen,size,board):
+    def draw(self,screen,size,board,update=False):
         center=( int(self.location[0]*size[0]/board+size[0]/2/board),int(self.location[1]*size[0]/board+size[0]/2/board) )
         pygame.draw.circle(screen, self.color, center, int(size[0]/board/4))
-        
+        if update==True:
+            pygame.display.update()

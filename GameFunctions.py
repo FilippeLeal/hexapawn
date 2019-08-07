@@ -77,7 +77,7 @@ def selectPiece(target,size,screen,board):
     return selected
 
 def movePiece(selectedPiece,target,size,screen,board,plist):
-    print(selectedPiece.validMoves(plist,board))
+    done=False
     squareSize=int(size[0]/board)
     brown=(185,122,87)
     white=(255,255,255)
@@ -86,12 +86,13 @@ def movePiece(selectedPiece,target,size,screen,board,plist):
         color=brown
     else:
         color=white
+    print("target=",target)
     if target in selectedPiece.validMoves(plist,board):
         pygame.draw.rect(screen,color,(int(oldLoc[0]*squareSize),int(oldLoc[1]*squareSize),squareSize,squareSize))
         selectedPiece.setLocation(target)
         selectedPiece.draw(screen,size,board)
         pygame.display.update()
-        selectedPiece=[]
-    return selectedPiece
+        done=True
+    return done
 
     
