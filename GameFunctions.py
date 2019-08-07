@@ -95,4 +95,15 @@ def movePiece(selectedPiece,target,size,screen,board,plist):
         done=True
     return done
 
-    
+def isGameOver(plist,size,board,winner="no one"):
+    isOver=False
+    if winner!="no one":
+        isOver=True
+    for i in plist:
+        if i.getController()=="player" and i.getLocation()[1]==0:
+            winner="player"
+            isOver=True
+        elif i.getController()=="CPU" and i.getLocation()[1]==board:
+            winner="CPU"
+            isOver=True
+    return isOver,winner
