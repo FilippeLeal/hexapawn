@@ -11,14 +11,19 @@ def main():
 
     # variables to control the main loop
     running = True
-    isgameset=False
+    GameOver=False
+    winner="Game Start!"
     turn = "player"
+    scoreBoard=[]
     selectedPiece=[]
     hadPiece=[]
     #the main Loop
     while running==True:
         plist=startGame(screen)  ##start a game from turn 1
-        while isgameset==False:  ##so the game will only restart if the previous is finished
+        GameOver=False
+        scoreBoard.append(winner)
+        print(scoreBoard)
+        while GameOver==False:  ##so the game will only restart if the previous is finished
             for event in pygame.event.get():
                 if turn=="player":
                     if pygame.mouse.get_pressed()[0]==1:
@@ -48,7 +53,7 @@ def main():
                         elif selectedPiece==[]:
                             selectedPiece=selectPiece(target,size,screen,board)
                             write("Select the location that you want to move the piece!",0,size,screen)
-                        
+                    GameOver,winner=isGameOver(plist,size,board)        
                                 
                             
 
@@ -56,7 +61,7 @@ def main():
                 if event.type == pygame.QUIT:
                     # change the value to False, to exit the main loop
                     running = False
-                    isgameset= True
+                    GameOver= True
         
 
 
