@@ -49,12 +49,12 @@ class Zone:
 
 
 class Piece:
-    def __init__(self,zone,sqr,color,controled):
+    def __init__(self,zone,sqr,color,controlled):
         self.zone=zone[sqr]
         self.sqr=sqr
         self.color=color
         self.selected=False
-        self.player=controled
+        self.player=controlled
 
     def draw(self,screen=screen,size=size):
         pygame.draw.circle(screen, self.color, self.zone.center, size[8])

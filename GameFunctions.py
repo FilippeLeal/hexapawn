@@ -106,7 +106,7 @@ def isGameOver(plist,size,board,winner="no one"):
         if i.getController()=="player" and i.getLocation()[1]==0:
             winner="player"
             isOver=True
-        elif i.getController()=="CPU" and i.getLocation()[1]==board:
+        elif i.getController()=="CPU" and i.getLocation()[1]==board-1:
             winner="CPU"
             isOver=True
     return isOver,winner

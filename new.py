@@ -1,7 +1,7 @@
 
 from GameFunctions import *
 from Pieces import *
-
+from random import randint
 
 # define a main function 
 def main():
@@ -21,6 +21,7 @@ def main():
     while running==True:
         plist=startGame(screen)  ##start a game from turn 1
         GameOver=False
+        turn="player"
         scoreBoard.append(winner)
         print(scoreBoard)
         while GameOver==False:  ##so the game will only restart if the previous is finished
@@ -31,7 +32,7 @@ def main():
                         target=getTileLocation(click,plist) 
                         #target returns as the location if the tile is empty or the Piece obj occupying it
                         if selectedPiece!=[]:
-                            if type(target)!=tuple:
+                            if type(target)!=tuple:#therefore, if the taget is not a location, it is a piece obj
                                 hadPiece.append(target)
                                 target=target.getLocation()     
 
@@ -45,6 +46,7 @@ def main():
                                 hadPiece=[]
 
                             else:
+                                turn="CPU"  
                                 selectedPiece=[]
                                 if hadPiece!=[]:
                                     plist.remove(hadPiece[0])
@@ -54,7 +56,39 @@ def main():
                             selectedPiece=selectPiece(target,size,screen,board)
                             write("Select the location that you want to move the piece!",0,size,screen)
                     GameOver,winner=isGameOver(plist,size,board)        
-                                
+                elif turn=="CPU":
+                    noMoves=False
+                    validChoice=False
+                    cpulist=[]
+                    for i in plist:
+                            if i.getController()=="CPU":
+                                cpulist.append(i)
+                    while validChoice==False and noMoves==False:
+                        if len(cpulist)>0:
+                            chosenPiece=randint(0,len(cpulist)-1)
+                            print("cpu piece id",chosenPiece)
+                            if len(cpulist[chosenPiece].validMoves(plist,board))>=1:
+                                chosenMove=randint(0,len(cpulist[chosenPiece].validMoves(plist,board))-1)
+                                print("chosen=",cpulist[chosenPiece].validMoves(plist,board))
+                                validChoice=True
+                            else:
+                                print("check1")
+                                cpulist.remove(cpulist[chosenPiece])
+                        else:
+                            print("check2")
+                            noMoves=True
+                            GameOver,winner=isGameOver(plist,size,board,"player")
+                            
+
+
+                    if validChoice==True:
+                        target=cpulist[chosenPiece].validMoves(plist,board)[chosenMove]
+                        done=movePiece(cpulist[chosenPiece],target,size,screen,board,plist)
+                        for i in plist:
+                            if i.getLocation()==target and i.getController()=="player":
+                                plist.remove(i)
+                        GameOver,winner=isGameOver(plist,size,board) 
+                    turn="player"
                             
 
                             
