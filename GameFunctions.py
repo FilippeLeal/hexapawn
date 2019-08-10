@@ -1,6 +1,6 @@
 #importing pygame and random module
 import pygame
-import random
+from random import randint
 from Pieces import *
 
 #Change game directory and size accordingly
@@ -89,7 +89,6 @@ def movePiece(selectedPiece,target,size,screen,board,plist):
         color=brown
     else:
         color=white
-    print("target=",target)
     if target in selectedPiece.validMoves(plist,board):
         pygame.draw.rect(screen,color,(int(oldLoc[0]*squareSize),int(oldLoc[1]*squareSize),squareSize,squareSize))
         selectedPiece.setLocation(target)
@@ -98,7 +97,7 @@ def movePiece(selectedPiece,target,size,screen,board,plist):
         done=True
     return done
 
-def isGameOver(plist,size,board,winner="no one"):
+def isGameOver(plist,size,board,screen,winner="no one"):
     isOver=False
     if winner!="no one":
         isOver=True
@@ -110,3 +109,31 @@ def isGameOver(plist,size,board,winner="no one"):
             winner="CPU"
             isOver=True
     return isOver,winner
+
+def checkImmobilization(plist,size,board,screen,turn):
+    GameOver=False
+    winner="no one"
+    noMoves=False
+    validChoice=False
+    availablePieces=[]
+    chosenMove=0
+    chosenPiece=0
+    if turn=="CPU":
+        opponent="player"
+    elif turn=="player":
+        opponent="CPU"
+    for i in plist:
+            if i.getController()==turn:
+                availablePieces.append(i)
+    while validChoice==False and noMoves==False:
+        if len(availablePieces)>0:
+            chosenPiece=randint(0,len(availablePieces)-1)
+            if len(availablePieces[chosenPiece].validMoves(plist,board))>=1:
+                chosenMove=randint(0,len(availablePieces[chosenPiece].validMoves(plist,board))-1)
+                validChoice=True
+            else:
+                availablePieces.remove(availablePieces[chosenPiece])
+        else:
+            noMoves=True
+            GameOver,winner=isGameOver(plist,size,board,screen,opponent)
+    return noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner

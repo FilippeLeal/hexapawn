@@ -1,7 +1,7 @@
 
 from GameFunctions import *
 from Pieces import *
-from random import randint
+
 
 # define a main function 
 def main():
@@ -25,8 +25,9 @@ def main():
         scoreBoard.append(winner)
         print(scoreBoard)
         while GameOver==False:  ##so the game will only restart if the previous is finished
-            for event in pygame.event.get():
-                if turn=="player":
+            if turn=="player":
+                noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn)
+                for event in pygame.event.get():
                     if pygame.mouse.get_pressed()[0]==1:
                         click=pygame.mouse.get_pos()
                         target=getTileLocation(click,plist) 
@@ -51,51 +52,30 @@ def main():
                                 if hadPiece!=[]:
                                     plist.remove(hadPiece[0])
                                     hadPiece=[]
-                                    print("piece number=",len(plist))
                         elif selectedPiece==[]:
                             selectedPiece=selectPiece(target,size,screen,board)
                             write("Select the location that you want to move the piece!",0,size,screen)
-                    GameOver,winner=isGameOver(plist,size,board)        
-                elif turn=="CPU":
-                    noMoves=False
-                    validChoice=False
-                    cpulist=[]
+                    #GameOver,winner=isGameOver(plist,size,board,screen)        
+            elif turn=="CPU":
+                noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn)
+
+                if noMoves==False:
+                    target=availablePieces[chosenPiece].validMoves(plist,board)[chosenMove]
+                    done=movePiece(availablePieces[chosenPiece],target,size,screen,board,plist)
                     for i in plist:
-                            if i.getController()=="CPU":
-                                cpulist.append(i)
-                    while validChoice==False and noMoves==False:
-                        if len(cpulist)>0:
-                            chosenPiece=randint(0,len(cpulist)-1)
-                            print("cpu piece id",chosenPiece)
-                            if len(cpulist[chosenPiece].validMoves(plist,board))>=1:
-                                chosenMove=randint(0,len(cpulist[chosenPiece].validMoves(plist,board))-1)
-                                print("chosen=",cpulist[chosenPiece].validMoves(plist,board))
-                                validChoice=True
-                            else:
-                                print("check1")
-                                cpulist.remove(cpulist[chosenPiece])
-                        else:
-                            print("check2")
-                            noMoves=True
-                            GameOver,winner=isGameOver(plist,size,board,"player")
-                            
-
-
-                    if validChoice==True:
-                        target=cpulist[chosenPiece].validMoves(plist,board)[chosenMove]
-                        done=movePiece(cpulist[chosenPiece],target,size,screen,board,plist)
-                        for i in plist:
-                            if i.getLocation()==target and i.getController()=="player":
-                                plist.remove(i)
-                        GameOver,winner=isGameOver(plist,size,board) 
-                    turn="player"
+                        if i.getLocation()==target and i.getController()=="player":
+                            plist.remove(i)
+                    GameOver,winner=isGameOver(plist,size,board,screen) 
+                
+                        
+                turn="player"
                             
 
                             
-                if event.type == pygame.QUIT:
-                    # change the value to False, to exit the main loop
-                    running = False
-                    GameOver= True
+            if event.type == pygame.QUIT:
+                # change the value to False, to exit the main loop
+                running = False
+                GameOver= True
         
 
 
