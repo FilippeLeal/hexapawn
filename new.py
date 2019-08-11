@@ -17,13 +17,19 @@ def main():
     scoreBoard=[]
     selectedPiece=[]
     hadPiece=[]
+    roundMoves=[]
+    badMoves=[]
     #the main Loop
     while running==True:
         plist=startGame(screen)  ##start a game from turn 1
         GameOver=False
         turn="player"
         scoreBoard.append(winner)
+        if winner=="player":
+            badMoves.append(roundMoves)
+
         print(scoreBoard)
+        roundMoves=[]
         while GameOver==False:  ##so the game will only restart if the previous is finished
             if turn=="player":
                 noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn)
@@ -47,6 +53,7 @@ def main():
                                 hadPiece=[]
 
                             else:
+                                roundMoves.append(target)
                                 turn="CPU"  
                                 selectedPiece=[]
                                 if hadPiece!=[]:
@@ -62,6 +69,8 @@ def main():
                 if noMoves==False:
                     target=availablePieces[chosenPiece].validMoves(plist,board)[chosenMove]
                     done=movePiece(availablePieces[chosenPiece],target,size,screen,board,plist)
+                    roundMoves.append(target)
+                    print(roundMoves)
                     for i in plist:
                         if i.getLocation()==target and i.getController()=="player":
                             plist.remove(i)
@@ -74,6 +83,7 @@ def main():
                             
             if event.type == pygame.QUIT:
                 # change the value to False, to exit the main loop
+                print(badMoves)
                 running = False
                 GameOver= True
         
