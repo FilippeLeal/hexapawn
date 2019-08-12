@@ -26,13 +26,14 @@ def main():
         turn="player"
         scoreBoard.append(winner)
         if winner=="player":
+            roundMoves.remove(roundMoves[-1])
             badMoves.append(roundMoves)
 
         print(scoreBoard)
         roundMoves=[]
         while GameOver==False:  ##so the game will only restart if the previous is finished
             if turn=="player":
-                noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn)
+                noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn,roundMoves,badMoves)
                 for event in pygame.event.get():
                     if pygame.mouse.get_pressed()[0]==1:
                         click=pygame.mouse.get_pos()
@@ -62,9 +63,9 @@ def main():
                         elif selectedPiece==[]:
                             selectedPiece=selectPiece(target,size,screen,board)
                             write("Select the location that you want to move the piece!",0,size,screen)
-                    #GameOver,winner=isGameOver(plist,size,board,screen)        
+                    GameOver,winner=isGameOver(plist,size,board,screen)        
             elif turn=="CPU":
-                noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn)
+                noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn,roundMoves,badMoves)
 
                 if noMoves==False:
                     target=availablePieces[chosenPiece].validMoves(plist,board)[chosenMove]

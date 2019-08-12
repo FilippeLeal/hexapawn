@@ -110,7 +110,7 @@ def isGameOver(plist,size,board,screen,winner="no one"):
             isOver=True
     return isOver,winner
 
-def checkImmobilization(plist,size,board,screen,turn):
+def checkImmobilization(plist,size,board,screen,turn,roundMoves,badMoves):
     GameOver=False
     winner="no one"
     noMoves=False
@@ -118,6 +118,7 @@ def checkImmobilization(plist,size,board,screen,turn):
     availablePieces=[]
     chosenMove=0
     chosenPiece=0
+    didItBefore=roundMoves.copy()
     if turn=="CPU":
         opponent="player"
     elif turn=="player":
@@ -131,6 +132,13 @@ def checkImmobilization(plist,size,board,screen,turn):
             if len(availablePieces[chosenPiece].validMoves(plist,board))>=1:
                 chosenMove=randint(0,len(availablePieces[chosenPiece].validMoves(plist,board))-1)
                 validChoice=True
+                didItBefore.append(availablePieces[chosenPiece].validMoves(plist,board)[chosenMove])
+                for i in badMoves:    
+                    if didItBefore==i:
+                        print("de novo?")
+                        validChoice=False
+                        didItBefore.remove(didItBefore[-1])
+
             else:
                 availablePieces.remove(availablePieces[chosenPiece])
         else:
