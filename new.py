@@ -18,7 +18,11 @@ def main():
     selectedPiece=[]
     hadPiece=[]
     roundMoves=[]
-    badMoves=[]
+    badMoves=[] #clean start
+    #final form
+    badMoves=[[(2, 1), (0, 1)], [(2, 1), (1, 1)], [(2, 1), (2, 1), (1, 1), (0, 1)], [(2, 1), (2, 1), (1, 1), (1, 1), (1, 1), (0, 1)], [(0, 1), (1, 1)], [(0, 1), (2, 1)], [(0, 1), (0, 1), (1, 1),
+    (2, 1)], [(1, 1), (1, 1), (1, 1), (0, 1), (2, 1), (2, 1)], [(1, 1), (2, 1)], [(1, 1), (1, 1), (1, 1), (2, 1), (0, 1), (0, 1)], [(1, 1), (0, 1)], [(1, 1), (1, 1), (1, 1), (1, 1)], [(1, 1), (1, 1), (0, 1), (2, 1)], [(1, 1), (1, 1), (2, 1), (0, 1)], [(1, 1), (1, 1), (2, 1), (2, 1), (1, 1), (0, 1)], [(1, 1), (1, 1), (0, 1), (0, 1), (1, 1), (2, 1)], [(0, 1), (0, 1),
+    (1, 1), (1, 1), (1, 1), (2, 1)]]
     #the main Loop
     while running==True:
         plist=startGame(screen)  ##start a game from turn 1
@@ -29,6 +33,7 @@ def main():
             roundMoves.remove(roundMoves[-1])
             badMoves.append(roundMoves)
 
+        print(roundMoves)    
         print(scoreBoard)
         roundMoves=[]
         while GameOver==False:  ##so the game will only restart if the previous is finished
@@ -71,7 +76,6 @@ def main():
                     target=availablePieces[chosenPiece].validMoves(plist,board)[chosenMove]
                     done=movePiece(availablePieces[chosenPiece],target,size,screen,board,plist)
                     roundMoves.append(target)
-                    print(roundMoves)
                     for i in plist:
                         if i.getLocation()==target and i.getController()=="player":
                             plist.remove(i)
@@ -85,6 +89,9 @@ def main():
             if event.type == pygame.QUIT:
                 # change the value to False, to exit the main loop
                 print(badMoves)
+                print(scoreBoard)
+                if "player" not in scoreBoard:
+                    print("HEXAPAWN HAS NO WEAKNESS")
                 running = False
                 GameOver= True
         

@@ -135,7 +135,6 @@ def checkImmobilization(plist,size,board,screen,turn,roundMoves,badMoves):
                 didItBefore.append(availablePieces[chosenPiece].validMoves(plist,board)[chosenMove])
                 for i in badMoves:    
                     if didItBefore==i:
-                        print("de novo?")
                         validChoice=False
                         didItBefore.remove(didItBefore[-1])
 
