@@ -22,6 +22,7 @@ class Pieces:
             self.color=(0,0,0)
     
     def validMoves(self,plist,board):
+        #it gets a list of all pieces, and examinate the possible piece move with the vacancy of the square
         valid=[]
         loc=self.location
         listloc=[]
@@ -48,8 +49,9 @@ class Pieces:
         return self.controlled
 
     def draw(self,screen,size,board,update=False):
+        #not only draws the piece, but the square behind it too
         squareSize=int(size[0]/board)
-        #center=( int(self.location[0]*size[0]/board+size[0]/2/board),int(self.location[1]*size[0]/board+size[0]/2/board) )
+        sqcolor=(255,255,0)
         corner=( int(self.location[0]*size[0]/board ), int(self.location[1]*size[0]/board ))
         bpawn = pygame.image.load('bpawn.png')
         bpawn2 = pygame.transform.scale(bpawn, (int(size[0]/board),int(size[0]/board)))
@@ -57,10 +59,15 @@ class Pieces:
         wpawn2 = pygame.transform.scale(wpawn, (int(size[0]/board),int(size[0]/board)))
         if self.color==(255,255,0):
             pygame.draw.rect(screen,self.color,(int(self.location[0]*squareSize),int(self.location[1]*squareSize),squareSize,squareSize))
+        else:
+            if (self.location[0]+self.location[1])%2==0:
+                sqcolor=(185,122,87)
+            else:
+                sqcolor=(255,255,255)
+        pygame.draw.rect(screen,sqcolor,(int(self.location[0]*squareSize),int(self.location[1]*squareSize),squareSize,squareSize))
         if self.controlled=="CPU":
             screen.blit(bpawn2, corner)
         elif self.controlled=="player":
             screen.blit(wpawn2, corner)
-        #pygame.draw.circle(screen, self.color, center, int(size[0]/board/4))
         if update==True:
             pygame.display.update()

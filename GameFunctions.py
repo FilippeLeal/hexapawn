@@ -2,16 +2,18 @@
 import pygame
 from random import randint
 from Pieces import *
+from win32api import GetSystemMetrics
 
-#Change game directory and size accordingly
-#direc = r"C:\Users\filip\Documents\python codes\hexapawn\local"     #desktop location
-direc = r"C:\Users\Filippe\Documents\GitHub\hexapawn"              #notebook location
-#size refers to: width and height of screen
-size=[360,385]                     #mini size
+
+#size refers to: width and height of window
+definition=GetSystemMetrics(1)
+#size=[200,0]
+size=[int(definition/1.5),0]
+size[1]=int(size[0]*1.1)                     #mini size
 board=3     #number of tiles on the side
 
 def makeBoard(size,board):
-    logo = pygame.image.load(direc+"\\pawn.png")
+    logo = pygame.image.load("pawn.png")
     pygame.display.set_icon(logo)
     pygame.display.set_caption("HexaPawn")
     
@@ -35,7 +37,7 @@ def drawBoard(size,board,screen):
 
 def write(text,wait,size,screen):
     screen.fill((255,255,255),(0,size[0],size[0],(size[1]-size[0])))
-    screen.blit(pygame.font.SysFont('Arial', int(size[0]/20)).render(text, False, (0, 0, 255)),(0,size[0]))
+    screen.blit(pygame.font.SysFont('Arial', int(size[0]/15)).render(text, False, (0, 0, 255)),(0,size[0]))
     pygame.display.update()
     pygame.time.wait(wait)
 

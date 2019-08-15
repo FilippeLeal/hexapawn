@@ -17,17 +17,20 @@ def main():
     scoreBoard=[]
     selectedPiece=[]
     hadPiece=[]
+    
+    #variables to get the moves registered for the AI
     roundMoves=[]
-    badMoves=[] #clean start
-    #final form
+    #clean Start
+    badMoves=[]
+    # AI final form
     badMoves=[[(2, 1), (0, 1)], [(2, 1), (1, 1)], [(2, 1), (2, 1), (1, 1), (0, 1)], [(2, 1), (2, 1), (1, 1), (1, 1), (1, 1), (0, 1)], [(0, 1), (1, 1)], [(0, 1), (2, 1)], [(0, 1), (0, 1), (1, 1),(2, 1)], [(1, 1), (1, 1), (1, 1), (0, 1), (2, 1), (2, 1)], [(1, 1), (2, 1)], [(1, 1), (1, 1), (1, 1), (2, 1), (0, 1), (0, 1)], [(1, 1), (0, 1)], [(1, 1), (1, 1), (1, 1), (1, 1)], [(1, 1), (1, 1), (0, 1), (2, 1)], [(1, 1), (1, 1), (2, 1), (0, 1)], [(1, 1), (1, 1), (2, 1), (2, 1), (1, 1), (0, 1)], [(1, 1), (1, 1), (0, 1), (0, 1), (1, 1), (2, 1)], [(0, 1), (0, 1),(1, 1), (1, 1), (1, 1), (2, 1)]]
     #the main Loop
     while running==True:
         plist=startGame(screen)  ##start a game from turn 1
-        GameOver=False
+        GameOver=False 
         turn="player"
         scoreBoard.append(winner)
-        if winner=="player":
+        if winner=="player": #CPU only remember moves that made it lose
             roundMoves.remove(roundMoves[-1])
             badMoves.append(roundMoves)
 
@@ -36,22 +39,24 @@ def main():
         roundMoves=[]
         while GameOver==False:  ##so the game will only restart if the previous is finished
             if turn=="player":
+                #the checkImmobilization check all valid moves and brings a random possible move as return
                 noMoves,chosenMove,chosenPiece,availablePieces,GameOver,winner=checkImmobilization(plist,size,board,screen,turn,roundMoves,badMoves)
                 for event in pygame.event.get():
                     if pygame.mouse.get_pressed()[0]==1:
                         click=pygame.mouse.get_pos()
                         target=getTileLocation(click,plist) 
-                        #target returns as the location if the tile is empty or the Piece obj occupying it
+                        #target return the location if the tile is empty or the Piece obj occupying it
                         if selectedPiece!=[]:
                             if type(target)!=tuple:#therefore, if the taget is not a location, it is a piece obj
                                 hadPiece.append(target)
                                 target=target.getLocation()     
 
-                            done=movePiece(selectedPiece,target,size,screen,board,plist)
+                            done=movePiece(selectedPiece,target,size,screen,board,plist) #return false if the move was unsuccessfull
                             if done==False:
                                 write("Invalid move!",1000,size,screen)
                                 write("Select the piece you want to move!",0,size,screen)
                                 selectedPiece.setLocation(selectedPiece.getLocation())
+                                selectedPiece.setColor((0,0,0))
                                 selectedPiece.draw(screen,size,board,update=True)
                                 selectedPiece=[]
                                 hadPiece=[]
@@ -85,11 +90,11 @@ def main():
 
                             
             if event.type == pygame.QUIT:
-                # change the value to False, to exit the main loop
                 print(badMoves)
                 print(scoreBoard)
                 if "player" not in scoreBoard:
                     print("HEXAPAWN HAS NO WEAKNESS")
+                # change both following variables to exit the main loops
                 running = False
                 GameOver= True
         
