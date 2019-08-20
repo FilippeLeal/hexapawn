@@ -1,4 +1,4 @@
-
+import sys
 from GameFunctions import *
 from Pieces import *
 
@@ -22,8 +22,22 @@ def main():
     roundMoves=[]
     #clean Start
     badMoves=[]
+    #load 
+    try:
+        file=open("GameMemory.txt","r")
+        moves=int(file.readline())
+        for i in range(0,moves):
+            roundMoves=[]
+            line=file.readline()
+            for i2 in range(0,(len(line)-2),2):
+                roundMoves.append((int(line[i2]),int(line[i2+1])))
+            badMoves.append(roundMoves)
+        file.close()
+    except:
+        #print("Oops!",sys.exc_info()[0],"occured.")
+        print("no File loaded")
     # AI final form
-    badMoves=[[(2, 1), (0, 1)], [(2, 1), (1, 1)], [(2, 1), (2, 1), (1, 1), (0, 1)], [(2, 1), (2, 1), (1, 1), (1, 1), (1, 1), (0, 1)], [(0, 1), (1, 1)], [(0, 1), (2, 1)], [(0, 1), (0, 1), (1, 1),(2, 1)], [(1, 1), (1, 1), (1, 1), (0, 1), (2, 1), (2, 1)], [(1, 1), (2, 1)], [(1, 1), (1, 1), (1, 1), (2, 1), (0, 1), (0, 1)], [(1, 1), (0, 1)], [(1, 1), (1, 1), (1, 1), (1, 1)], [(1, 1), (1, 1), (0, 1), (2, 1)], [(1, 1), (1, 1), (2, 1), (0, 1)], [(1, 1), (1, 1), (2, 1), (2, 1), (1, 1), (0, 1)], [(1, 1), (1, 1), (0, 1), (0, 1), (1, 1), (2, 1)], [(0, 1), (0, 1),(1, 1), (1, 1), (1, 1), (2, 1)]]
+    #badMoves=[[(2, 1), (0, 1)], [(2, 1), (1, 1)], [(2, 1), (2, 1), (1, 1), (0, 1)], [(2, 1), (2, 1), (1, 1), (1, 1), (1, 1), (0, 1)], [(0, 1), (1, 1)], [(0, 1), (2, 1)], [(0, 1), (0, 1), (1, 1),(2, 1)], [(1, 1), (1, 1), (1, 1), (0, 1), (2, 1), (2, 1)], [(1, 1), (2, 1)], [(1, 1), (1, 1), (1, 1), (2, 1), (0, 1), (0, 1)], [(1, 1), (0, 1)], [(1, 1), (1, 1), (1, 1), (1, 1)], [(1, 1), (1, 1), (0, 1), (2, 1)], [(1, 1), (1, 1), (2, 1), (0, 1)], [(1, 1), (1, 1), (2, 1), (2, 1), (1, 1), (0, 1)], [(1, 1), (1, 1), (0, 1), (0, 1), (1, 1), (2, 1)], [(0, 1), (0, 1),(1, 1), (1, 1), (1, 1), (2, 1)]]
     #the main Loop
     while running==True:
         plist=startGame(screen)  ##start a game from turn 1
@@ -87,10 +101,19 @@ def main():
                         
                 turn="player"
                             
-
+            if GameOver==True:
+                write((winner+" WINS!!!"),1500,size,screen)
                             
             if event.type == pygame.QUIT:
-                print(badMoves)
+                file=open("GameMemory.txt","w")
+                file.write(str(len(badMoves))+"\n")
+                for i in range(0,len(badMoves)):
+                    for i2 in range(0,len(badMoves[i])):
+                        file.write(str(badMoves[i][i2][0]))
+                        file.write(str(badMoves[i][i2][1]))
+                    file.write("\n")
+
+                file.close()
                 print(scoreBoard)
                 if "player" not in scoreBoard:
                     print("HEXAPAWN HAS NO WEAKNESS")
